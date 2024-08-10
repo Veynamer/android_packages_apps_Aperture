@@ -6,43 +6,29 @@
 package org.lineageos.aperture.ui
 
 import android.content.Context
-import android.graphics.RectF
+import android.graphics.Color
 import android.util.AttributeSet
-import android.util.Range
-import android.view.MotionEvent
-import org.lineageos.aperture.ext.*
+import com.google.android.material.slider.Slider
 
 class HorizontalSlider @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : Slider(context, attrs) {
-    override fun track(): RectF {
-        val trackHeight = height / 5
 
-        val left = height / 2f
-        val right = width - left
+    init {
+        // Set Material You style attributes
+        trackColorActive = context.getColor(R.color.your_active_color)
+        trackColorInactive = context.getColor(R.color.your_inactive_color)
+        thumbColor = context.getColor(R.color.your_thumb_color)
 
-        val top = (height - trackHeight) / 2f
-        val bottom = height - top
+        // Optional: Set default values
+        valueFrom = 0f
+        valueTo = 100f
+        value = 50f // Set an initial value if needed
 
-        return RectF(left, top, right, bottom)
+        // Optional: Set a step size
+        stepSize = 1f
     }
 
-    override fun thumb(): Triple<Float, Float, Float> {
-        val track = track()
-        val trackWidth = track.width()
-
-        val cx = if (steps > 0) {
-            val progress = Int.mapToRange(Range(0, steps), progress).toFloat() / steps
-            (trackWidth * progress) + track.left
-        } else {
-            (trackWidth * progress) + track.left
-        }
-        val cy = height / 2f
-
-        return Triple(cx, cy, height / 2.15f)
-    }
-
-    @Suppress("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         super.onTouchEvent(event)
 
@@ -54,8 +40,9 @@ class HorizontalSlider @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN,
             MotionEvent.ACTION_MOVE,
             MotionEvent.ACTION_UP -> {
-                progress = event.x.coerceIn(0f, width.toFloat()) / width
-                onProgressChangedByUser?.invoke(progress)
+                // Update the progress based on touch
+                value = event.x.coerceIn(0f, width.toFloat()) / width * (valueTo - valueFrom) + valueFrom
+                onProgressChangedByUser?.invoke(value)
             }
         }
 
